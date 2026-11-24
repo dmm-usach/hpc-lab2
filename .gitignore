@@ -66,3 +66,26 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Proyecto
+build/
+data/
+results/
+*.vti
+/gas
+/hello
+/halo_test
+
+# LaTeX auxiliares
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+docs/*.nav
+docs/*.snm
+docs/*.vrb
+docs/*.fls
+docs/*.fdb_latexmk
+
+# Python
+__pycache__/

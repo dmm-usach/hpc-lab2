@@ -1,0 +1,121 @@
+1 /*EJECUTA EL MISMO CODIGO EN 3 SSTEP*/
+  2 extern "C" {
+  3 #include <bsp.h>
+  4 }
+  5
+  6 #include <stdio.h>
+  7
+  8 #include <string.h>
+  9 #include <stdlib.h>
+ 10 #include <string.h>
+ 11
+ 12 int   nm,    // numero de mensajes que recibe cada procesador.
+ 13       nb,    // total de bytes en la cola de mensajes.
+ 14       tag,   // identificador (header) de mensajes (no lo usamos).
+ 15       sztag, // tama o del indentificador.
+ 16       total; // tama o en bytes del siguiente mensaje a ser sacado
+ 17              // de la cola de nuevos mensajes en el procesador.
+ 18
+ 19
+ 20 #include <list>
+ 21 using namespace std;
+ 22
+ 23 class Dato
+ 24 {
+ 25  public:
+ 26   int edad;
+ 27   char *nombre;
+ 28   char *apellido;
+ 29
+ 30   Dato( int e, char *n, char *a)
+ 31   {
+ 32     edad = e;
+ 33     nombre = new char[strlen(n)];
+ 34     apellido = new char[strlen(a)];
+ 35   }
+36 };
+ 37
+ 38
+ 39 void bsp_main()
+ 40 {
+ 41
+ 42   bsp_begin( bsp_nprocs() );
+ 43
+ 44   int pid= bsp_pid();
+ 45   int nprocs= bsp_nprocs();
+ 46   int packets, accum_bytes,bytes;
+ 47   char pp[1024];
+ 48   int menor = 91;
+ 49   int  mayor = 0;
+ 50
+ 51   tag = 0;
+ 52   sztag= sizeof(int);
+ 53
+ 54   bsp_set_tagsize(&sztag);
+ 55
+ 56   Dato *d_enviado[3];
+ 57   // Envia al procesador 0 toda la lista.
+ 58   for(int j=0;j<3;j++)
+ 59   {
+ 60      d_enviado[j] = new Dato((pid+j)*10,"n1","a1");
+ 61      bsp_send(0, &tag, d_enviado[j], sizeof(Dato));
+ 62   }
+ 63
+ 64   bsp_sync();
+ 65   //SStep 2 -- Solo el proc 0 calcula min y max
+ 66   if (pid==0)
+68     bsp_qsize(&packets, &accum_bytes);
+ 69
+ 70     for(int i=0;i<packets;i++)
+ 71     {
+ 72       bsp_get_tag(&bytes,0);
+ 73       bsp_move(pp,bytes);
+ 74       Dato *d_recibido=new Dato(0,"","");
+ 75       memcpy(d_recibido,pp,sizeof(Dato));
+ 76       //printf("EDAD %d\n", d_recibido->edad);
+ 77       if (mayor<d_recibido->edad) mayor = d_recibido->edad;
+ 78       if (menor>d_recibido->edad) menor = d_recibido->edad;
+ 79     }
+ 80     printf("PID %d MENOR %d, MAYOR %d\n",pid,menor,mayor);
+ 81
+ 82     for (int i=1;i<nprocs;i++)
+ 83     {
+ 84       tag = 0;
+ 85       bsp_send(i,&tag,&menor,sizeof(int));
+ 86       tag = 1;
+ 87       bsp_send(i,&tag,&mayor,sizeof(int));
+ 88     }
+ 89   }
+ 90   bsp_sync();
+ 91
+ 92   //SStep 3
+ 93   bsp_qsize(&packets, &accum_bytes);
+ 94
+ 95   if(pid!=0)
+ 96   {
+ 97   tag = 0;
+98   bsp_get_tag(&bytes,&tag);
+ 99   bsp_move(&menor,bytes);
+100
+101   tag = 1;
+102   bsp_get_tag(&bytes,&tag);
+103   bsp_move(&mayor,bytes);
+104
+105   printf("PID %d MENOR %d, MAYOR %d\n",pid,menor,mayor);
+106   }
+107   bsp_sync();
+108   bsp_end();
+109 }
+110
+111
+112 int main (int argc, char *argv[])
+113 {
+114    void bsp_main();
+115
+116    bsp_init(bsp_main, argc, argv);
+117
+118    bsp_main();
+119
+120    return 0;
+121 }
+                                                    
