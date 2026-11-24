@@ -63,8 +63,8 @@ La documentación original del curso está en `ejemplos/`:
 - `Ejemplo2.cc.txt`, `Ejemplo2_v2.cc.txt`, `Ejemplo3.cc.txt`,
   `Ejemplo3_v3.txt`: ejemplos de BSPlib. Algunos tienen errores didácticos
   (serialización de punteros, buffers fijos, falta de llaves).
-- `directivas.txt` e `instalar.txt`: texto extraído de los PDFs por esta
-  sesión; no son documentación original.
+- Los textos extraídos de los PDFs (`directivas.txt`, `instalar.txt`) no se
+  versionan; se pueden regenerar con `pdftotext` si hacen falta.
 
 ---
 
@@ -114,8 +114,10 @@ La documentación original del curso está en `ejemplos/`:
   `tests/`, `ejemplos/`) sin trackear.
 - `ejemplos/` es material del curso; no borrarlo.
 - `data/`, `results/`, `build/` están ignorados por git.
-- `./gas` en la raíz es un binario residual de una compilación manual; está
-  ignorado y se puede borrar.
+- `./gas` en la raíz era un binario residual de una compilación manual; fue
+  eliminado y está ignorado.
+- Los textos extraídos de los PDFs y las figuras auxiliares no usadas están
+  en `.gitignore`; no se versionan.
 - Los auxiliares de LaTeX (`docs/*.aux`, `.log`, `.out`, `.toc`, `.nav`,
   `.snm`, `.vrb`, `.fls`, `.fdb_latexmk`) son generados; se pueden limpiar con
   `latexmk -c` en `docs/`.
@@ -782,12 +784,12 @@ latexmk -pdf presentacion.tex
 | `scaling.png` | Tiempo y speedup | Informe |
 | `comm_fraction.png` | Fracción de comunicación | Informe |
 
-### 11.4 Figuras extra
+### 11.4 Figuras auxiliares no versionadas
 
-Generadas pero no usadas en los documentos actuales:
-`chamber_profile.png`, `chamber_slices_wide.png`,
-`chamber_slices_wide2.png`, `sphere_slices.png`, `spacetime_sphere.png`.
-Se pueden usar para una versión más extendida.
+Estas figuras se pueden regenerar con los scripts, pero no se versionan para
+no cargar el repositorio: `chamber_profile.png`,
+`chamber_slices_wide.png`, `chamber_slices_wide2.png`, `sphere_slices.png`,
+`spacetime_sphere.png`. Están incluidas en `.gitignore`.
 
 ### 11.5 Regenerar figuras
 

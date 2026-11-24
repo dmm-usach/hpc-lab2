@@ -99,3 +99,14 @@ results/
 
 # Python
 __pycache__/
+
+# Textos extraídos de PDFs del curso (se regeneran con pdftotext)
+ejemplos/directivas.txt
+ejemplos/instalar.txt
+
+# Figuras auxiliares no usadas en los documentos finales (se regeneran)
+docs/figs/chamber_profile.png
+docs/figs/chamber_slices_wide.png
+docs/figs/chamber_slices_wide2.png
+docs/figs/sphere_slices.png
+docs/figs/spacetime_sphere.png
