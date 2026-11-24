@@ -76,16 +76,26 @@ results/
 /hello
 /halo_test
 
-# LaTeX auxiliares
-docs/*.aux
-docs/*.log
-docs/*.out
-docs/*.toc
-docs/*.nav
-docs/*.snm
-docs/*.vrb
-docs/*.fls
-docs/*.fdb_latexmk
+# LaTeX: residuos de compilación (los PDFs entregables sí se versionan)
+*.aux
+*.bcf
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.run.xml
+*.snm
+*.spl
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
 
 # Python
 __pycache__/
