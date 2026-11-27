@@ -19,7 +19,7 @@ Documentos:
 - [`docs/informe.pdf`](docs/informe.pdf) — informe con modelo, validación y
   resultados.
 - [`docs/presentacion_clase.pdf`](docs/presentacion_clase.pdf) — **presentación
-  para la clase** (18 páginas): solo lo que pidió el profesor, es decir el
+  para la clase** (15 páginas): solo lo que pidió el profesor, es decir el
   sistema, las reglas del autómata y la paralelización híbrida. **Es la
   versión que se presenta.**
 - [`docs/presentacion.pdf`](docs/presentacion.pdf) — presentación completa de la

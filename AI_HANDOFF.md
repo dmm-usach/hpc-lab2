@@ -15,7 +15,7 @@ corregir o extender este proyecto sin reconstruir el contexto.
 > **Advertencia importante para quien revise:**
 > - El **informe** (`docs/informe.pdf`) **sí incluye resultados**.
 > - La **presentación que se expone en clase** es `docs/presentacion_clase.pdf`
->   (fuente `docs/presentacion_clase.tex`, 18 páginas): solo sistema, reglas
+>   (fuente `docs/presentacion_clase.tex`, 15 páginas): solo sistema, reglas
 >   del CA y paralelización híbrida, que es lo que pidió el profesor. Sus
 >   slides son **copias** de `presentacion.tex`, no están enlazadas: editar
 >   **solo** `presentacion_clase.tex` para la clase.
@@ -754,7 +754,7 @@ usarlas para medir rendimiento. La tabla se midió sin perfil.
 - `docs/informe.pdf` (15 páginas, fuente `docs/informe.tex`):
   modelo, reglas, paralelización, validación, resultados, evolución temporal
   y apéndices. **Incluye resultados.**
-- `docs/presentacion_clase.pdf` (18 páginas, fuente
+- `docs/presentacion_clase.pdf` (15 páginas, fuente
   `docs/presentacion_clase.tex`): **versión que se presenta en clase**. Solo
   el sistema, las reglas del CA y la paralelización híbrida (4 slides:
   dos niveles, superpaso BSP, modelo de costo `w + h·g + L` aplicado y

@@ -46,14 +46,9 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Contenido}
-  \tableofcontents
-\end{frame}
-
 % ---------------------------------------------------------------------------
 \section{El sistema}
 % ---------------------------------------------------------------------------
-
 
 \begin{frame}{Problema}
   \begin{itemize}
@@ -73,108 +68,33 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Gas ideal: supuestos y justificación}
+\begin{frame}{Gas ideal: neón a 1 atm y 300 K}
   \begin{columns}[T]
     \begin{column}{0.53\textwidth}
       \begin{itemize}
         \item Partículas puntuales, sin fuerzas de largo alcance.
-        \item Colisiones binarias elásticas y caos molecular.
-        \item Gas noble monoatómico: capa cerrada, $\gamma=5/3$, sin modos
-              internos.
-        \item A 1 atm y 300 K:
-              $Z=1+B_2 n\approx 1.00046$; corrección del \alert{0.05\%}.
+        \item Colisiones binarias elásticas.
+        \item Gas noble monoatómico: $\gamma=5/3$, sin modos internos.
+        \item A 1 atm y 300 K la corrección del virial es
+              \alert{0.05\%}: el gas ideal basta.
       \end{itemize}
     \end{column}
     \begin{column}{0.45\textwidth}
       \begin{block}{Decisión}
         \footnotesize
-        Se modela como \alert{gas ideal}. Se desprecian las interacciones
-        intermoleculares: en un gas noble a 1 atm son muy débiles y la
-        corrección del virial es despreciable.
+        \alert{Neón} como gas ideal. La presión sale de la densidad del
+        autómata: $p=\tfrac{\rho}{3}\,p_0$, con $p_0=1$ atm.
       \end{block}
       \begin{alertblock}{Limitación declarada}
         \footnotesize
         El autómata es \alert{isotérmico}: no captura el enfriamiento
-        adiabático. Se justifica porque el foco es HPC y morfología.
+        adiabático. El foco es HPC y la forma de la expansión.
       \end{alertblock}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Elección del gas y mapeo de unidades}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \centering
-      \scriptsize
-      \begin{tabular}{lrr}
-        \toprule
-        & Neón & Helio \\
-        \midrule
-        $m$ [kg] & $3.35\times10^{-26}$ & $6.65\times10^{-27}$ \\
-        $c_{s,\text{iso}}$ [m/s] & 351.6 & 789.4 \\
-        $c_{s,\text{ad}}$ [m/s] & 453.9 & 1019.1 \\
-        $\rho$ a 1 atm [kg/m$^3$] & 0.8197 & 0.1626 \\
-        \bottomrule
-      \end{tabular}
-      \vspace{2mm}
-      \begin{block}{Decisión}
-        \scriptsize
-        \alert{Neón} por defecto: monoatómico, $c_s$ moderada y densidad fácil
-        de verificar. Helio queda como alternativa.
-      \end{block}
-    \end{column}
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Mapeo}
-        \footnotesize
-        \[
-          p=\frac{\rho}{3},\qquad c_s^2=\frac{1}{3}
-        \]
-        \[
-          \Delta t=\frac{1}{\sqrt{3}}\frac{\Delta x}{c_{s,\text{iso}}},\qquad
-          p\,[\text{Pa}]=\frac{\rho}{3}p_0
-        \]
-        Con $\Delta x=1$ mm: $\Delta t=1.642\,\mu$s y
-        $N_c\approx 8.15\times10^{15}$ moléculas/partícula.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Geometrías iniciales}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Esfera densa}
-        \footnotesize
-        \begin{itemize}
-          \item $R=\max(6,N/8)$.
-          \item $\rho_H=3$ adentro, $\rho_L=0$ afuera.
-          \item Cada dirección con $p=1/2$.
-          \item Caso base para comparar.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Cámara de dos presiones}
-        \footnotesize
-        \begin{itemize}
-          \item $\rho_H=3$ ($p_H=1$ atm) para $x<0.25N$.
-          \item $\rho_L=0.3$ ($p_L=0.1$ atm) para $x\ge 0.25N$.
-          \item Razón $10{:}1$ y rampa de ancho $w$ (\texttt{RAMP}).
-          \item Gradiente explícito y medible.
-        \end{itemize}
-      \end{block}
-    \end{column}
-  \end{columns}
-  \vspace{4mm}
-  \begin{block}{Decisión}
-    \footnotesize
-    Se implementan \alert{ambas}: la esfera como caso base y la cámara para
-    estudiar un gradiente de presión controlado. La cámara es la geometría
-    principal del experimento.
-  \end{block}
-\end{frame}
-
-\begin{frame}{Cámara 10:1: parámetros del gradiente}
+\begin{frame}{Condición inicial: cámara de dos presiones}
   \begin{columns}[T]
     \begin{column}{0.50\textwidth}
       \centering
@@ -194,15 +114,15 @@
       \begin{block}{Valores}
         \footnotesize
         \begin{itemize}
-          \item $p_H=1$ atm, $p_L=0.1$ atm.
-          \item $x_i=0.25N$, $w=8$ celdas.
-          \item $|\nabla p|\approx 0.1125$ atm/mm.
+          \item $p_H=1$ atm ($\rho_H=3$) para $x<0.25N$.
+          \item $p_L=0.1$ atm ($\rho_L=0.3$) en el resto.
+          \item Razón $10{:}1$, rampa de $w=8$ celdas.
         \end{itemize}
       \end{block}
       \begin{block}{Por qué}
         \footnotesize
-        Da una razón de presiones finita, una interfaz clara y una onda de
-        expansión medible. Permite comparar con la teoría cualitativa.
+        Gradiente de presión explícito y una onda de expansión medible.
+        Una \alert{esfera densa} en vacío queda como caso base.
       \end{block}
     \end{column}
   \end{columns}
@@ -211,7 +131,6 @@
 % ---------------------------------------------------------------------------
 \section{Reglas del autómata celular}
 % ---------------------------------------------------------------------------
-
 
 \begin{frame}{Estado del autómata}
   \begin{columns}[T]
@@ -264,38 +183,60 @@
   \end{block}
   \begin{alertblock}{Invariantes}
     \footnotesize
-    Masa y momento total se conservan \alert{exactamente}.
+    Masa y momento total se conservan \alert{exactamente}: estado entero y
+    reglas locales, un autómata celular estricto y sin errores de redondeo.
   \end{alertblock}
 \end{frame}
 
-\begin{frame}{Justificación del CA y alternativas}
+\begin{frame}{Ejemplo: un paso del autómata}
   \centering
-  \scriptsize
-  \begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{3.2cm}}
-    \toprule
-    Modelo & Ventaja & Limitación & Decisión \\
-    \midrule
-    LGA 6 direcciones & CA estricto, entero, conservativo, 1 byte/celda &
-    anisotropía cúbica, isotérmico & \alert{elegido} \\
-    LBM D3Q7 & más estable y realista & no es CA estricto, flotantes &
-    alternativa \\
-    Stencil de densidad & simple y rápido & no es un CA &
-    descartado \\
-    \bottomrule
-  \end{tabular}
-  \vspace{3mm}
-  \begin{block}{Por qué LGA}
+  \begin{tikzpicture}[>=Stealth,font=\scriptsize]
+    \foreach \ox/\lab in {0/Antes, 4.0/Tras la colisión, 8.0/Tras el streaming} {
+      \begin{scope}[shift={(\ox,0)}]
+        \node at (1.2,2.75) {\small\textbf{\lab}};
+      \end{scope}
+    }
+    % panel 1: choque frontal en x
+    \fill[blue!10] (0.8,0.8) rectangle (1.6,1.6);
+    \draw[gray!60] (0,0) grid[step=0.8] (2.4,2.4);
+    \draw[->,very thick,red] (1.2,1.2) -- ++(0.36,0);
+    \draw[->,very thick,red] (1.2,1.2) -- ++(-0.36,0);
+    \node[align=center] at (1.2,-0.45) {$+x$ y $-x$\\masa 2, momento 0};
+    % flecha colisión
+    \draw[->,thick] (2.7,1.2) -- node[above] {colisión} (3.7,1.2);
+    % panel 2: salen en y
+    \begin{scope}[shift={(4.0,0)}]
+      \fill[blue!10] (0.8,0.8) rectangle (1.6,1.6);
+      \draw[gray!60] (0,0) grid[step=0.8] (2.4,2.4);
+      \draw[->,very thick,blue] (1.2,1.2) -- ++(0,0.36);
+      \draw[->,very thick,blue] (1.2,1.2) -- ++(0,-0.36);
+      \node[align=center] at (1.2,-0.45) {$+y$ y $-y$\\masa 2, momento 0};
+    \end{scope}
+    % flecha streaming
+    \draw[->,thick] (6.7,1.2) -- node[above] {streaming} (7.7,1.2);
+    % panel 3: cada partícula avanza a la vecina
+    \begin{scope}[shift={(8.0,0)}]
+      \fill[blue!10] (0.8,1.6) rectangle (1.6,2.4);
+      \fill[blue!10] (0.8,0.0) rectangle (1.6,0.8);
+      \draw[gray!60] (0,0) grid[step=0.8] (2.4,2.4);
+      \draw[->,very thick,blue] (1.2,2.0) -- ++(0,0.36);
+      \draw[->,very thick,blue] (1.2,0.4) -- ++(0,-0.36);
+      \node[align=center] at (1.2,-0.45) {cada partícula pasa\\a la celda vecina};
+    \end{scope}
+  \end{tikzpicture}
+  \vspace{4mm}
+  \begin{block}{Cómo se lee}
     \footnotesize
-    El curso pide \alert{reglas de autómata celular}; el LGA las cumple sin
-    ambigüedad. La conservación exacta de masa y momento permite validar el
-    paralelismo sin errores de redondeo.
+    Dos partículas chocan de frente. La tabla de la celda elige la salida
+    entre $\pm x$, $\pm y$ y $\pm z$: todas tienen \alert{la misma masa y el
+    mismo momento}. Luego cada partícula avanza una celda en su dirección.
+    {\scriptsize (Vista en el plano $x$--$y$; en 3D se suma $\pm z$.)}
   \end{block}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \section{Paralelización híbrida}
 % ---------------------------------------------------------------------------
-
 
 \begin{frame}{La idea: dividir el cubo en dos niveles}
   \begin{columns}[T]
