@@ -18,6 +18,21 @@
 \setbeamertemplate{navigation symbols}{}
 \setbeamerfont{frametitle}{size=\large}
 
+% Divisor de sección: una slide con el título de la sección que comienza
+\setbeamertemplate{section page}{
+  \centering
+  {\usebeamercolor[fg]{structure}\large Sección \insertsectionnumber\par}
+  \vspace{3mm}
+  \begin{beamercolorbox}[sep=12pt,center,rounded=true,shadow=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par
+  \end{beamercolorbox}
+}
+\AtBeginSection[]{
+  \begin{frame}[plain,noframenumbering]
+    \sectionpage
+  \end{frame}
+}
+
 \title[Gas 3D con LGA híbrido]{Expansión de un gas 3D con autómata celular\\y paralelismo híbrido BSPlib + OpenMP}
 \subtitle{Propuesta de proyecto --- Laboratorio 2}
 \author[Ahumada, Muñoz]{Gonzalo Ahumada \and Daniel Muñoz}
