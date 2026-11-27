@@ -7,14 +7,19 @@ corregir o extender este proyecto sin reconstruir el contexto.
 - **Autores:** Gonzalo Ahumada y Daniel Muñoz.
 - **Curso:** Laboratorio 2 — High Performance Computing, Universidad de
   Santiago de Chile.
-- **Última actualización:** 2026-11-24.
+- **Última actualización:** 2026-11-26.
 - **Estado:** implementación, validación, informe y presentación terminados.
   Quedan pendientes experimentales (nodo de 32 hilos, paredes reflectantes,
   modelo térmico) que no bloquean la entrega.
 
 > **Advertencia importante para quien revise:**
 > - El **informe** (`docs/informe.pdf`) **sí incluye resultados**.
-> - La **presentación** (`docs/presentacion.pdf`) es una **propuesta**: no
+> - La **presentación que se expone en clase** es `docs/presentacion_clase.pdf`
+>   (fuente `docs/presentacion_clase.tex`, 18 páginas): solo sistema, reglas
+>   del CA y paralelización híbrida, que es lo que pidió el profesor. Sus
+>   slides son **copias** de `presentacion.tex`, no están enlazadas: editar
+>   **solo** `presentacion_clase.tex` para la clase.
+> - La **presentación completa** (`docs/presentacion.pdf`) es una **propuesta**: no
 >   incluye resultados, solo problema, modelo, decisiones, plan de validación,
 >   plan de experimentos, riesgos y alternativas. No agregar métricas de
 >   corridas a la presentación sin consultar.
@@ -161,6 +166,7 @@ OMP_NUM_THREADS=4 mpirun -np 4 --bind-to none \
 cd docs
 latexmk -pdf informe.tex
 latexmk -pdf presentacion.tex
+latexmk -pdf presentacion_clase.tex
 ```
 
 ---
@@ -567,6 +573,7 @@ alltoall de BSPonMPI, no el ancho de banda.
 │   └── plot_evolution.py
 ├── docs/
 │   ├── informe.tex / informe.pdf
+│   ├── presentacion_clase.tex / .pdf   # versión para la clase
 │   ├── presentacion.tex / presentacion.pdf
 │   ├── JUSTIFICACION_GAS_IDEAL.md
 │   └── figs/
@@ -747,7 +754,14 @@ usarlas para medir rendimiento. La tabla se midió sin perfil.
 - `docs/informe.pdf` (15 páginas, fuente `docs/informe.tex`):
   modelo, reglas, paralelización, validación, resultados, evolución temporal
   y apéndices. **Incluye resultados.**
-- `docs/presentacion.pdf` (28 slides, fuente `docs/presentacion.tex`):
+- `docs/presentacion_clase.pdf` (18 páginas, fuente
+  `docs/presentacion_clase.tex`): **versión que se presenta en clase**. Solo
+  el sistema, las reglas del CA y la paralelización híbrida (4 slides:
+  dos niveles, superpaso BSP, modelo de costo `w + h·g + L` aplicado y
+  dimensionamiento N=1024 para 4×8). Slides copiadas desde
+  `presentacion.tex`; los cambios para la clase se hacen solo aquí.
+- `docs/presentacion.pdf` (29 páginas con divisores de sección, fuente
+  `docs/presentacion.tex`):
   **propuesta** con problema, modelo, decisiones, plan de validación, plan de
   experimentos, riesgos y alternativas. **No incluye resultados.**
 - `docs/JUSTIFICACION_GAS_IDEAL.md`: justificación física y mapeo de unidades.
@@ -760,6 +774,7 @@ Compilar:
 cd docs
 latexmk -pdf informe.tex
 latexmk -pdf presentacion.tex
+latexmk -pdf presentacion_clase.tex
 ```
 
 ### 11.2 Figuras de diseño (sin datos de corridas)
@@ -928,6 +943,7 @@ python3 scripts/plot_evolution.py
 cd docs
 latexmk -pdf informe.tex
 latexmk -pdf presentacion.tex
+latexmk -pdf presentacion_clase.tex
 ```
 
 ---
@@ -946,8 +962,12 @@ latexmk -pdf presentacion.tex
    - no llamar BSPlib desde hilos;
    - verificar que los halos se lean después del `bsp_sync`.
 6. Si se cambia la presentación:
-   - recordar que es una **propuesta sin resultados**;
-   - mantener las diapositivas de justificación, riesgos y alternativas.
+   - la que se expone en clase es `docs/presentacion_clase.tex`; editar
+     **solo ese archivo** para la clase (sus slides son copias de
+     `presentacion.tex` y no se sincronizan solas);
+   - `presentacion.tex` es la propuesta completa: recordar que es una
+     **propuesta sin resultados** y mantener las diapositivas de
+     justificación, riesgos y alternativas.
 7. Actualizar `README.md`, este archivo y los PDFs.
 
 ---

@@ -18,7 +18,18 @@ Documentos:
 
 - [`docs/informe.pdf`](docs/informe.pdf) — informe con modelo, validación y
   resultados.
-- [`docs/presentacion.pdf`](docs/presentacion.pdf) — presentación de la propuesta (problema, modelo, decisiones y plan; sin resultados).
+- [`docs/presentacion_clase.pdf`](docs/presentacion_clase.pdf) — **presentación
+  para la clase** (18 páginas): solo lo que pidió el profesor, es decir el
+  sistema, las reglas del autómata y la paralelización híbrida. **Es la
+  versión que se presenta.**
+- [`docs/presentacion.pdf`](docs/presentacion.pdf) — presentación completa de la
+  propuesta (29 páginas: además incluye validación, experimentos, riesgos y
+  alternativas). Queda como referencia.
+
+> **Importante: las dos presentaciones son archivos independientes.** Las
+> slides de `presentacion_clase.tex` se copiaron desde `presentacion.tex`; no
+> están enlazadas. Un cambio en uno **no** aparece en el otro. Acuerdo: los
+> cambios para la clase se hacen **solo en `presentacion_clase.tex`**.
 - [`docs/JUSTIFICACION_GAS_IDEAL.md`](docs/JUSTIFICACION_GAS_IDEAL.md) —
   justificación del gas ideal y mapeo a neón/helio.
 - [`AI_HANDOFF.md`](AI_HANDOFF.md) — contexto completo para revisión por otra
@@ -258,7 +269,8 @@ grandes. Para el objetivo 4×8 hace falta un nodo de 32 hilos.
 ├── results/             # CSV de scaling (ignorado por git)
 ├── docs/
 │   ├── informe.tex / informe.pdf
-│   ├── presentacion.tex / presentacion.pdf
+│   ├── presentacion_clase.tex / .pdf   # versión para la clase (se presenta)
+│   ├── presentacion.tex / presentacion.pdf   # propuesta completa (referencia)
 │   ├── JUSTIFICACION_GAS_IDEAL.md
 │   └── figs/            # figuras del informe y la presentación
 ├── ejemplos/            # material original del curso
