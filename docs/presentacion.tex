@@ -312,163 +312,113 @@
 \section{Paralelización híbrida}
 % ---------------------------------------------------------------------------
 
-\begin{frame}{Modelo BSP: superpasos}
-  \centering
-  \begin{tikzpicture}[node distance=0.6cm,font=\small,>=Stealth]
-    \node[draw,rounded corners,fill=blue!10,align=center] (c)
-      {cómputo local\\OpenMP};
-    \node[draw,rounded corners,fill=orange!15,right=of c,align=center] (p)
-      {\texttt{bsp\_put}\\halos};
-    \node[draw,rounded corners,fill=red!10,right=of p,align=center] (s)
-      {\texttt{bsp\_sync}\\barrera};
-    \node[draw,rounded corners,fill=blue!10,right=of s,align=center] (n)
-      {siguiente\\superpaso};
-    \draw[->] (c)--(p);
-    \draw[->] (p)--(s);
-    \draw[->] (s)--(n);
-  \end{tikzpicture}
-  \vspace{3mm}
-  \begin{itemize}
-    \item BSPlib sobre MPI (BSPonMPI): $P$ procesos SPMD.
-    \item Comunicación \alert{diferida}: se materializa en \texttt{bsp\_sync}.
-    \item Costo: $T=\max_i w_i+\max_i h_i g+l$.
-  \end{itemize}
-  \begin{block}{Decisión}
-    \footnotesize
-    BSP/BSPlib es requisito del curso y encaja con un stencil regular:
-    comunicación por bloques y barrera por superpaso.
-  \end{block}
+\begin{frame}{La idea: dividir el cubo en dos niveles}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{hybrid_4x8.png}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \begin{block}{Procesos (BSPlib)}
+        \footnotesize
+        El cubo se corta en $P=4$ bloques de capas en $x$. Cada proceso tiene
+        \alert{su propia memoria}: no ve los datos de los otros.
+      \end{block}
+      \begin{block}{Hilos (OpenMP)}
+        \footnotesize
+        Dentro de cada bloque, $T=8$ hilos se reparten las celdas.
+        \alert{Comparten memoria}: no necesitan mensajes.
+      \end{block}
+      \begin{block}{Resultado}
+        \footnotesize
+        $4\times8=32$ hilos trabajando a la vez.
+      \end{block}
+    \end{column}
+  \end{columns}
 \end{frame}
 
-\begin{frame}{Descomposición de dominio}
-  \centering
-  \includegraphics[width=0.98\textwidth]{decomposition.png}\par
-  \vspace{-1mm}
-  {\scriptsize 1D en $x$; $N$ no necesita ser divisible por $P$. Halos en $x$
-   y copias locales en $y,z$.}
+\begin{frame}{Un paso de simulación = un superpaso BSP}
+  \begin{columns}[T]
+    \begin{column}{0.44\textwidth}
+      \begin{enumerate}
+        \footnotesize
+        \item \alert{Calcular} colisiones \hfill {\scriptsize (OpenMP)}
+        \item \alert{Enviar bordes}: la capa del borde va al ghost del vecino
+              \hfill {\scriptsize (\texttt{bsp\_put})}
+        \item \alert{Esperar a todos} \hfill {\scriptsize (\texttt{bsp\_sync})}
+        \item \alert{Mover} partículas \hfill {\scriptsize (OpenMP)}
+      \end{enumerate}
+      \vspace{2mm}
+      \begin{alertblock}{Regla de seguridad}
+        \footnotesize
+        BSPlib no es thread-safe: solo el \alert{hilo maestro} envía y
+        sincroniza, fuera de las regiones OpenMP.
+      \end{alertblock}
+    \end{column}
+    \begin{column}{0.54\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{halo_exchange.png}\par
+      {\scriptsize Solo se envía una cara por vecino, no el volumen.}
+    \end{column}
+  \end{columns}
 \end{frame}
 
-\begin{frame}{Caso $N$ no divisible por $P$}
-  \centering
-  \includegraphics[width=0.82\textwidth]{decomposition_uneven.png}\par
-  \vspace{-2mm}
-  {\scriptsize $N=10$, $P=3$: rank 0 recibe 4 capas; ranks 1--2 reciben 3.
-   Vecinos: $0\leftrightarrow2,1$; $1\leftrightarrow0,2$;
-   $2\leftrightarrow1,0$.}
-\end{frame}
-
-\begin{frame}{Qué se comunica en cada paso}
-  \centering
-  \includegraphics[width=0.80\textwidth]{communication_volume.png}\par
-  \vspace{-2mm}
-  {\scriptsize Solo las dos caras en $x$; $y,z$ son copias locales.}
-\end{frame}
-
-\begin{frame}{Volumen de comunicación por superpaso}
-  \begin{block}{Fórmula}
+\begin{frame}{Cuánto cuesta un superpaso}
+  \begin{block}{Modelo de costo BSP aplicado a nuestro paso}
     \[
-      V_{\text{rank}} = 2\,(N+2)^2\ \text{bytes},\qquad
-      V_{\text{total}} = 2P\,(N+2)^2
+      T_{\text{paso}} \;=\;
+      \underbrace{\tfrac{N}{P}\,N^2\, t_c}_{w:\ \text{calcular (volumen)}}
+      \;+\;
+      \underbrace{2\,(N+2)^2\, g}_{h\cdot g:\ \text{bordes (superficie)}}
+      \;+\;
+      \underbrace{L}_{\text{barrera}}
     \]
   \end{block}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Ejemplo $N=256$, $P=4$}
-        \scriptsize
-        \begin{tabular}{lr}
-          \toprule
-          payload por mensaje & 66.6 KB \\
-          mensajes por rank/paso & 2 \\
-          bytes por rank/paso & 133 KB \\
-          bytes totales/paso & 0.53 MB \\
-          1000 pasos & 0.53 GB \\
-          \bottomrule
-        \end{tabular}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Interpretación}
-        \scriptsize
-        El volumen local por rank es $n_x N^2 \approx 4.2$ MB. La comunicación
-        es $\approx 3\%$ de ese volumen por paso; el costo dominante es la
-        barrera y el alltoall de BSPonMPI, no el ancho de banda.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Vista 3D del subdominio local}
-  \centering
-  \includegraphics[width=0.78\textwidth]{communication_volume_3d.png}\par
-  \vspace{-2mm}
-  {\scriptsize Las caras naranjas se envían; el volumen azul se calcula
-   localmente.}
-\end{frame}
-
-\begin{frame}{Detalle del intercambio de halos}
-  \centering
-  \includegraphics[width=0.95\textwidth]{halo_exchange.png}\par
-  \vspace{-1mm}
-  {\scriptsize \texttt{bsp\_put} escribe en el ghost del vecino;
-   \texttt{bsp\_sync} hace visible la comunicación diferida.}
-\end{frame}
-
-\begin{frame}{Procesos e hilos}
-  \centering
-  \includegraphics[width=0.80\textwidth]{hybrid_threads.png}\par
-  \vspace{-1mm}
-  {\scriptsize $P=4$ procesos, $T=4$ hilos; OpenMP reparte el interior y el
-   hilo maestro se encarga de la comunicación.}
-\end{frame}
-
-\begin{frame}[fragile]{Hilos y thread safety}
-  \begin{columns}[T]
-    \begin{column}{0.55\textwidth}
-      \begin{itemize}
-        \item OpenMP en colisión, streaming, métricas y densidad.
-        \item \texttt{collapse(3)} sobre $(x,y,z)$.
-        \item BSPlib \alert{no} es thread-safe.
-        \item Llamadas BSPlib solo desde el hilo maestro, fuera de las
-              regiones paralelas.
-        \item Una región OpenMP por fase, con barrera implícita.
-      \end{itemize}
-      \begin{block}{Decisión}
-        \footnotesize
-        Evita condiciones de carrera y mantiene el modelo BSP: cómputo
-        paralelo, comunicación serial, \texttt{bsp\_sync}.
-      \end{block}
-    \end{column}
-    \begin{column}{0.43\textwidth}
-      \begin{lstlisting}[language=C++,basicstyle=\ttfamily\tiny,
-                         breaklines=true,frame=single]
-#pragma omp parallel for collapse(3)
-for (x...) for (y...) for (z...)
-    collide_or_stream(x,y,z);
-
-bsp_put(left,  lo, ghost_hi, 0, bytes);
-bsp_put(right, hi, ghost_lo, 0, bytes);
-bsp_sync();
-      \end{lstlisting}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}[fragile]{Implementación: stack y build}
   \begin{itemize}
-    \item C++17, OpenMP, OpenMPI 4.1.6, BSPonMPI 0.3.
-    \item \texttt{src/gas.cpp}: autómata + driver BSP/OpenMP + VTK.
-    \item \texttt{CMakeLists.txt}, \texttt{docker/Dockerfile},
-          \texttt{scripts/}.
-    \item Compilar con \texttt{-DOMPI\_SKIP\_MPICXX} (OpenMPI 4.x).
+    \footnotesize
+    \item $t_c$: costo de actualizar una celda; $g$: costo por byte enviado;
+          $L$: costo de sincronizar.
+    \item El cálculo crece con el \alert{volumen} ($N^3$); la comunicación con
+          la \alert{superficie} ($N^2$).
+    \item Razón comunicación / cálculo $\;\approx\; \dfrac{2P}{N}$.
   \end{itemize}
-  \vspace{1mm}
-  \begin{lstlisting}[language=bash,basicstyle=\ttfamily\scriptsize,
-                     breaklines=true,frame=single]
-docker build -t hpc-lab2:latest -f docker/Dockerfile .
-./scripts/docker_shell.sh bash -lc './scripts/build.sh'
-GEOM=chamber P_RATIO=10 RAMP=8 OMP_NUM_THREADS=4 \
-  mpirun -np 4 --bind-to none ./build/gas 256 1000 4 100 chamber
-  \end{lstlisting}
+  \begin{alertblock}{Idea clave}
+    \footnotesize
+    Mientras más grande el cubo, menos pesa la comunicación: el problema debe
+    ser grande para que $4\times8$ valga la pena.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Por qué un problema grande: $N=1024$}
+  \centering
+  \footnotesize
+  \begin{tabular}{lrr}
+    \toprule
+    $P=4$, $T=8$ & $N=256$ & $N=1024$ \\
+    \midrule
+    Comunicación / cálculo ($2P/N$) & 3.1\,\% & 0.8\,\% \\
+    Celdas por hilo & 0.5 M & 33.5 M \\
+    Halo enviado por proceso y paso & 133 KB & 2.1 MB \\
+    Memoria total (2 buffers) & 33 MB & 2.1 GB \\
+    \bottomrule
+  \end{tabular}
+  \vspace{4mm}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{$N=256$}
+        \footnotesize
+        Cada hilo tiene poco trabajo: pasa más tiempo esperando la barrera
+        que calculando.
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{$N=1024$}
+        \footnotesize
+        Trabajo de sobra por hilo y comunicación despreciable:
+        \alert{exigente pero posible en un PC}.
+      \end{block}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------------

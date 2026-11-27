@@ -6,6 +6,7 @@ Genera:
   docs/figs/halo_exchange.png
   docs/figs/communication_volume.png
   docs/figs/hybrid_threads.png
+  docs/figs/hybrid_4x8.png
 """
 import os
 
@@ -356,13 +357,13 @@ def communication_volume_3d():
 
 
 # ---------------------------------------------------------------------------
-def hybrid_threads():
+def hybrid_threads(P=4, T=4, name="hybrid_threads.png"):
     fig, ax = plt.subplots(figsize=(10, 5.2))
-    P, T = 4, 4
     x0, y0 = 0.6, 0.8
     bw, bh = 2.0, 3.4
     gap = 0.28
-    shades = ["#cfe2f3", "#b6d7e8", "#9fc5e8", "#8ab6d6"]
+    base = ["#cfe2f3", "#b6d7e8", "#9fc5e8", "#8ab6d6"]
+    shades = [base[t % len(base)] for t in range(T)]
     for p in range(P):
         x = x0 + p * (bw + gap)
         box(ax, x, y0, 0.16, bh, C_GHOST, C_GHOST_EDGE, lw=0.7)
@@ -378,7 +379,7 @@ def hybrid_threads():
                 ax.text(x - 0.12, y0 + (t + 0.5) * th, f"h{t}",
                         ha="right", va="center", fontsize=7.5, color="#555")
 
-    ax.text(x0, y0 + bh + 0.75, "P = 4 procesos × T = 4 hilos",
+    ax.text(x0, y0 + bh + 0.75, f"P = {P} procesos × T = {T} hilos",
             fontsize=13, weight="bold")
     ax.text(x0, y0 + bh + 0.42,
             "OpenMP reparte el interior; el hilo maestro hace bsp_put y bsp_sync",
@@ -392,7 +393,7 @@ def hybrid_threads():
     clean(ax, (0.0, x0 + P * (bw + gap) + 0.2), (0.2, y0 + bh + 0.95))
     ax.set_title("Paralelismo híbrido: procesos e hilos",
                  fontsize=14, weight="bold", pad=4)
-    fig.savefig(os.path.join(OUT, "hybrid_threads.png"), dpi=200,
+    fig.savefig(os.path.join(OUT, name), dpi=200,
                 bbox_inches="tight")
     plt.close(fig)
 
@@ -404,6 +405,7 @@ def main():
     communication_volume()
     communication_volume_3d()
     hybrid_threads()
+    hybrid_threads(P=4, T=8, name="hybrid_4x8.png")
     print("Figuras en", OUT)
 
 
