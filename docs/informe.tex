@@ -405,12 +405,56 @@ donde $w_i$ es el cómputo local, $h_i$ el volumen de comunicación, $g$ el cost
 por palabra y $l$ la latencia de la barrera. En la práctica se mide la
 fracción de comunicación como \texttt{comm\_max}/\texttt{time\_loop}.
 
+Aplicado a un paso de nuestro autómata, cada rank actualiza $n_x N^2\approx
+(N/P)\,N^2$ celdas y envía dos caras de $(N+2)^2$ bytes (una a cada vecino):
+\begin{equation}
+  T_{\text{paso}} \;=\;
+  \underbrace{\frac{N}{P}\,N^2\,t_c}_{w}
+  \;+\;
+  \underbrace{2\,(N+2)^2}_{h}\,g
+  \;+\; l,
+  \label{eq:costo-paso}
+\end{equation}
+donde $t_c$ es el costo de actualizar una celda (colisión + streaming). El
+cómputo crece con el \emph{volumen} del subdominio y la comunicación con su
+\emph{superficie}, de modo que la razón entre ambos es
+\begin{equation}
+  \frac{h}{w/t_c} \;=\; \frac{2\,(N+2)^2}{(N/P)\,N^2} \;\approx\; \frac{2P}{N}.
+  \label{eq:razon}
+\end{equation}
+Mientras más grande es el cubo, menos pesa la comunicación frente al cómputo.
+
 Con $N=256$, cada cara mide $(N+2)^2=66.6$ KB; cada rank envía dos caras, es
 decir $133$ KB por paso. Con $P=4$, el total es $0.53$ MB por paso
 ($0.53$ GB en 1000 pasos). El volumen local por rank es
 $n_xN^2\approx4.2$ MB, así que la comunicación representa cerca del $3\%$ del
 volumen local por paso; el costo dominante es la latencia de la barrera y el
 alltoall de BSPonMPI, no el ancho de banda.
+
+\paragraph{Tamaño propuesto para $4\times8$.}
+Con $N=256$ y $4\times8=32$ hilos, cada hilo procesa apenas medio millón de
+celdas por paso, por lo que el término fijo $l$ (la barrera) gana peso frente
+al cómputo. Para que la configuración $4\times8$ se justifique se propone
+$N=1024$ (tabla~\ref{tab:sizing}): la comunicación baja a menos del $1\%$ del
+cómputo y cada hilo recibe $33.5$ millones de celdas, con una memoria total de
+$2.1$ GB, exigente pero posible en un PC.
+
+\begin{table}[H]
+\centering
+\caption{Dimensionamiento para $P=4$ procesos y $T=8$ hilos, según
+la ecuación~\eqref{eq:razon}.}
+\label{tab:sizing}
+\begin{tabular}{lrr}
+\toprule
+ & $N=256$ & $N=1024$ \\
+\midrule
+Comunicación / cómputo ($2P/N$) & $3.1\%$ & $0.8\%$ \\
+Celdas por hilo & $0.5$ M & $33.5$ M \\
+Halo enviado por proceso y paso & $133$ KB & $2.1$ MB \\
+Memoria total (2 buffers) & $33$ MB & $2.1$ GB \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ---------------------------------------------------------------------------
 \section{Implementación}
@@ -590,6 +634,11 @@ ancho RMS y fracción de masa con $x\ge 0.25N$.}
         alta en $4\times2$ ($\approx45\%$), donde hay poco trabajo por rank.
   \item El objetivo $4\times8$ requiere un nodo de 32 hilos; en esta laptop
         $4\times4$ es la configuración híbrida razonable.
+  \item Estos resultados usan $N=256$, donde cada hilo tiene poco trabajo y la
+        barrera pesa. Según la ecuación~\eqref{eq:razon}, con $N=1024$ la
+        comunicación cae a menos del $1\%$ del cómputo
+        (tabla~\ref{tab:sizing}); es el tamaño propuesto para evaluar
+        $4\times8$.
   \item La comparación byte a byte serial/paralelo es una validación fuerte de
         la corrección del esquema híbrido.
 \end{itemize}
@@ -607,7 +656,8 @@ da un gradiente explícito.
 
 Trabajo futuro:
 \begin{enumerate}[leftmargin=*]
-  \item Correr $4\times8$ en un nodo de 32 hilos y completar weak scaling.
+  \item Correr $4\times8$ con $N=1024$ en un nodo de 32 hilos y completar
+        weak scaling.
   \item Agregar paredes reflectantes para un recipiente cerrado.
   \item Evaluar un LGA térmico (partícula en reposo, energía) para expansión
         adiabática.
